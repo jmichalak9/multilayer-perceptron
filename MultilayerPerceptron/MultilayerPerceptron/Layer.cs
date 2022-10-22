@@ -7,118 +7,84 @@ namespace MultilayerPerceptron;
 
 public class Layer
 {
-    private Func<Single, Single> activationFunction;
-    private Func<Single, Single> activationFunctionDeriv;
+    private IActivationFunction _activationFunction;
+    private IErrorFunction _errorFunction;
 
-    private Matrix<Single> weights;
-    private Vector<Single> biases;
+    private Matrix<double> weights;
+    private Vector<double> biases;
     private readonly int width;
     
     // backprop
-    private Vector<Single> lastZ;
-    private Vector<Single> lastActivations;
-    private Vector<Single> lastE;
-    private Matrix<Single> lastL;
+    private Vector<double> lastZ;
+    private Vector<double> lastActivations;
+    private Vector<double> delta;
 
     private Layer prev;
     private Layer next;
-
-    private float learningRate;
     
     public Layer(int width)
     {
         this.width = width;
     }
 
-    public void Initialize(float learningRate, Layer prev, Layer next)
+    public void Initialize(Layer prev, Layer next, IActivationFunction activationFunction, IErrorFunction errorFunction, Random rng)
     {
         if (prev == null)
         {
             return;
         }
-        this.learningRate = learningRate;
+
         this.prev = prev;
         this.next = next;
-        biases = Vector<Single>.Build.Random(width, new ContinuousUniform(0, 1));
-        lastE = Vector<Single>.Build.Dense(width);
-        lastL = Matrix<Single>.Build.Dense(width, prev.width);
-
-        weights = Matrix<Single>.Build.Dense(width, prev.width);
-        var lower = -(1.0 / Math.Sqrt(prev.width));
-        var upper = (1.0 / Math.Sqrt(prev.width));
-        var rand = new Random();
+        biases = Vector<double>.Build.Random(width, new ContinuousUniform(0, 1));
+        weights = Matrix<double>.Build.Dense(width, prev.width);
 
         for (int i = 0; i < weights.RowCount; i++)
         {
             for (int j = 0; j < weights.ColumnCount; j++)
             {
-                weights[i, j] = (float)(lower + rand.NextSingle() *(upper-lower));
+                weights[i, j] = rng.NextDouble();
             }
         }
 
-        activationFunction = f => (float)(1 / (1 + Math.Exp(-f)));
-        activationFunctionDeriv = f => activationFunction(f) * (1 - activationFunction(f));
+        _activationFunction = activationFunction;
+        _errorFunction = errorFunction;
     }
 
-    public Vector<Single> Forward(Vector<Single> data)
+    public Vector<double> Forward(Vector<double> data)
     {
         if (prev == null)
         {
             lastActivations = data;
             return data;
         }
-        var z = Vector<Single>.Build.Dense(width);
-        var activations = Vector<Single>.Build.Dense(width);
-        for (int i = 0; i < width; i++)
-        {
-            var neuronWeights = weights.Row(i);
-            var neuronBias = biases[i];
-            z[i] = data * neuronWeights + neuronBias;
-            activations[i] = activationFunction(z[i]);
-        }
 
-        lastZ = z;
-        lastActivations = activations;
-        return activations;
+        lastZ = weights * data + biases;
+        lastActivations = lastZ.Map(_activationFunction.Value);
+
+        return lastActivations;
     }
 
-    public void Back(Vector<Single> labels)
+    public void Back(Vector<double> labels)
     {
         if (next == null)
         {
-            lastE = lastActivations - labels;
-        }
-        else
-        {
-            lastE = Vector<Single>.Build.Dense(width);
-            for (int i = 0; i < weights.RowCount; i++)
+            var errors = new double[labels.Count];
+            for (int i = 0; i < labels.Count; i++)
             {
-                for (int j = 0; j < next.lastL.ColumnCount; j++)
-                {
-                    lastE[i] = next.lastL[j, i];
-
-                }
+                errors[i] = _errorFunction.DerivativeValue(lastActivations[i], labels[i]);
             }
+
+            var dE = Vector<double>.Build.DenseOfArray(errors);
+            delta = dE.PointwiseMultiply(lastZ.Map(_activationFunction.DerivativeValue)); //OK
+            return;
         }
 
-        var dLdA = lastE * 2;
-        var dAdZ = lastZ.Map(activationFunctionDeriv);
-        for (int i = 0; i < weights.RowCount; i++)
-        {
-            lastL.SetRow(i, weights.Row(i) * lastE[i]);
-        }
+        delta = (next.weights.Transpose() * next.delta).PointwiseMultiply(lastZ.Map(_activationFunction.DerivativeValue));
+    }
 
-        for (int i = 0; i < weights.RowCount; i++)
-        {
-            for (int j = 0; j < weights.Row(i).Count; j++)
-            {
-                var dZdW = prev.lastActivations[j];
-                var dLdW = dLdA[i] * dAdZ[i] * dZdW;
-                weights[i, j] -= dLdW * learningRate;
-            }
-        }
-
-        var biasUpdate = dLdA * dAdZ;
-        biases = biases - biasUpdate * learningRate;
+    public void UpdateWeight(double learningRate)
+    {
+        weights -= learningRate * prev.lastActivations.OuterProduct(delta);
     }
 }
