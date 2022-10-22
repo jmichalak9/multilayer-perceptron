@@ -1,7 +1,5 @@
 using MathNet.Numerics.Distributions;
 using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.LinearAlgebra.Double;
-using MathNet.Numerics.LinearAlgebra.Single;
 
 namespace MultilayerPerceptron;
 
@@ -72,7 +70,7 @@ public class Layer
             var errors = new double[labels.Count];
             for (int i = 0; i < labels.Count; i++)
             {
-                errors[i] = _errorFunction.DerivativeValue(lastActivations[i], labels[i]);
+                errors[i] = _errorFunction.DerivativeValue(labels[i], lastActivations[i]);
             }
 
             var dE = Vector<double>.Build.DenseOfArray(errors);
@@ -80,11 +78,12 @@ public class Layer
             return;
         }
 
-        delta = (next.weights.Transpose() * next.delta).PointwiseMultiply(lastZ.Map(_activationFunction.DerivativeValue));
+        delta = (next.weights.Transpose().Multiply(next.delta)).PointwiseMultiply(lastZ.Map(_activationFunction.DerivativeValue));
     }
 
     public void UpdateWeight(double learningRate)
     {
-        weights -= learningRate * prev.lastActivations.OuterProduct(delta);
+        weights = weights.Subtract(learningRate * delta.OuterProduct(prev.lastActivations)); //OK
+        biases -= delta;
     }
 }

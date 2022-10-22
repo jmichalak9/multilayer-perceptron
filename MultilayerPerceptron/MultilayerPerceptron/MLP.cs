@@ -55,14 +55,9 @@ public class MLP
 
                 predictions.SetRow(i, activations);
 
-                for (int step = 0; step < layers.Length; step++)
+                for (int j = layers.Length - 1; j > 0; j--)
                 {
-                    var l = layers.Length - (step + 1);
-                    var layer = layers[l];
-                    if (l == 0)
-                    {
-                        continue;
-                    }
+                    var layer = layers[j];
                     layer.Back(labels.Row(i));
                 }
 
@@ -71,6 +66,7 @@ public class MLP
                     layers[step].UpdateWeight(learningRate);
                 }
             }
+
             var accuracy = CalculateAccuracy(predictions, labels);
             double loss = CalculateLoss(predictions, labels);
             Console.WriteLine($"Epoch: {e}, Loss: {loss}, Accuracy: {accuracy}");
@@ -90,7 +86,7 @@ public class MLP
             }
         }
         
-        return result;
+        return result / preds.RowCount;
     }
 
     private double CalculateAccuracy(Matrix<double> preds, Matrix<double> labels)
@@ -122,10 +118,5 @@ public class MLP
             predicted.SetRow(i, activations);
         }
         return predicted;
-    }
-
-    private void ValidateInputs()
-    {
-        
     }
 }
