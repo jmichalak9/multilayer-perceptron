@@ -27,13 +27,13 @@ class Program
         var trainInputs = Matrix<double>.Build.DenseOfArray(trainInputsRaw);
         var trainOutput = Matrix<double>.Build.DenseOfArray(outputMatrix);
 
-        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(5), new Layer(1) };
+        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(5), new Layer(5), new Layer(5), new Layer(1) };
 
         var errorFunction = ErrorFunctions.Square;
-        var activationFunction = ActivationFunctions.Sigmoid;
+        var activationFunction = ActivationFunctions.Linear(0.01);
 
-        var mlp = new MLP(layers, errorFunction, activationFunction, 0.001f, 0f);
-        mlp.Fit(50, trainInputs, trainOutput, true);
+        var mlp = new MLP(layers, errorFunction, activationFunction, 0.1f, 0f);
+        mlp.Fit(3000, trainInputs, trainOutput, true);
 
         (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.activation.test.100.csv");
         outputMatrix = new double[testLabelsRaw.Length, 1];
@@ -63,7 +63,7 @@ class Program
 
 
         var mlp = new MLP(layers, errorFunction, activationFunction, 0.001f, 0f);
-        mlp.Fit(100, trainInputs, trainLabels);
+        mlp.Fit(100, trainInputs, trainLabels, false);
 
         (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.three_gauss.test.10000.csv");
         (var testInputs, var testLabels) = ProcessClassification(testInputsRaw, testLabelsRaw);
