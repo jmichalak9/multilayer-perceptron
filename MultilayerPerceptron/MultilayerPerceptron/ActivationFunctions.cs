@@ -29,6 +29,7 @@ namespace MultilayerPerceptron
                 return (double)(1.0 / (1.0 + Math.Exp(-x)));
             }
         }
+
         class TanhClass : IActivationFunction
         {
             public double DerivativeValue(double x)
@@ -41,6 +42,7 @@ namespace MultilayerPerceptron
                 return Math.Tanh(x);
             }
         }
+
         class ReLUClass : IActivationFunction
         {
             public double DerivativeValue(double x)
@@ -53,6 +55,7 @@ namespace MultilayerPerceptron
                 return Math.Max(0, x);
             }
         }
+
         class LeakyReLUClass : IActivationFunction
         {
             private double a;
@@ -68,6 +71,26 @@ namespace MultilayerPerceptron
             public double Value(double x)
             {
                 return Math.Max(a*x, x);
+            }
+        }
+
+        class LinearClass : IActivationFunction
+        {
+            private double a;
+
+            public LinearClass(double a)
+            {
+                this.a = a;
+            }
+
+            public double DerivativeValue(double x)
+            {
+                return a;
+            }
+
+            public double Value(double x)
+            {
+                return a * x;
             }
         }
     }

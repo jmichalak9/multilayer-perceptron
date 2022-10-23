@@ -10,10 +10,9 @@ namespace MultilayerPerceptron
     {
         public static IErrorFunction Square = new SquareClass();
 
-        public static IErrorFunction PseudoHuber(double delta)
-        {
-            return new PseudoHuberClass(delta);
-        } 
+        public static IErrorFunction PseudoHuber(double delta) => new PseudoHuberClass(delta);
+
+        public static IErrorFunction CrossEntropy = new CrossEntropyClass();
 
         class SquareClass : IErrorFunction
         {
@@ -27,6 +26,7 @@ namespace MultilayerPerceptron
                 return (x - y) * (x - y) / 2.0;
             }
         }
+        
         class PseudoHuberClass : IErrorFunction
         {
             private double delta;
@@ -54,6 +54,19 @@ namespace MultilayerPerceptron
                     return z * z / 2;
                 }
                 return delta * Math.Abs(z) - delta * delta / 2;
+            }
+        }
+    
+        class CrossEntropyClass : IErrorFunction
+        {
+            public double DerivativeValue(double x, double y)
+            {
+                return -x / y + (1 - x) / (1 - y);
+            }
+
+            public double Value(double x, double y)
+            {
+                return -x * Math.Log(y);
             }
         }
     }
