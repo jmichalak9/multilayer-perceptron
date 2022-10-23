@@ -11,11 +11,8 @@ namespace MultilayerPerceptron
         public static IActivationFunction Sigmoid = new SigmoidClass();
         public static IActivationFunction Tanh = new TanhClass();
         public static IActivationFunction ReLU = new ReLUClass();
-
-        public static IActivationFunction LeakyReLU(double a)
-        {
-           return new LeakyReLUClass(a);
-        }
+        public static IActivationFunction LeakyReLU(double a) => new LeakyReLUClass(a);
+        public static IActivationFunction Linear(double a) => new LinearClass(a);
 
         class SigmoidClass : IActivationFunction
         {

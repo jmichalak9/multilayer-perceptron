@@ -3,17 +3,61 @@
 using MathNet.Numerics.LinearAlgebra;
 using MultilayerPerceptron;
 using System.Globalization;
+using System.Reflection.Emit;
 
 class Program
 {
     public static void Main()
+    {
+        //Classification();
+        Regression();
+    }
+
+    public static void Regression()
+    {
+        Console.WriteLine("Training data path");
+        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.activation.train.100.csv");
+
+        var outputMatrix = new double[trainLabelsRaw.Length, 1];
+        for (int i = 0; i < trainLabelsRaw.Length; i++)
+        {
+            outputMatrix[i, 0] = trainLabelsRaw[i];
+        }
+
+        var trainInputs = Matrix<double>.Build.DenseOfArray(trainInputsRaw);
+        var trainOutput = Matrix<double>.Build.DenseOfArray(outputMatrix);
+
+        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(5), new Layer(1) };
+
+        var errorFunction = ErrorFunctions.Square;
+        var activationFunction = ActivationFunctions.Sigmoid;
+
+        var mlp = new MLP(layers, errorFunction, activationFunction, 0.001f, 0f);
+        mlp.Fit(50, trainInputs, trainOutput, true);
+
+        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.activation.test.100.csv");
+        outputMatrix = new double[testLabelsRaw.Length, 1];
+        for (int i = 0; i < trainLabelsRaw.Length; i++)
+        {
+            outputMatrix[i, 0] = testLabelsRaw[i];
+        }
+
+        var testInputs = Matrix<double>.Build.DenseOfArray(testInputsRaw);
+        var testOutput = Matrix<double>.Build.DenseOfArray(outputMatrix);
+
+        var predictions = mlp.Predict(testInputs);
+        var loss = MLP.CalculateLoss(predictions, testOutput, ErrorFunctions.Square);
+        Console.WriteLine(loss);
+    }
+
+    public static void Classification()
     {
         Console.WriteLine("Training data path");
         (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.three_gauss.train.10000.csv");
         (var trainInputs, var trainLabels) = ProcessClassification(trainInputsRaw, trainLabelsRaw);
 
 
-        Layer[] layers = {new Layer(trainInputsRaw.GetLength(1)), new Layer(5), new Layer(trainLabels.ColumnCount)};
+        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(5), new Layer(trainLabels.ColumnCount) };
 
         var errorFunction = ErrorFunctions.Square;
         var activationFunction = ActivationFunctions.Sigmoid;

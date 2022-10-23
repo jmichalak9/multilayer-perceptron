@@ -33,7 +33,7 @@ public class MLP
         }
     }
 
-    public void Fit(int epochs, Matrix<double> data, Matrix<double> labels)
+    public void Fit(int epochs, Matrix<double> data, Matrix<double> labels, bool isRegression = false)
     {
         double loss = 0.0;
         for (int e = 0; e < epochs; e++)
@@ -71,15 +71,23 @@ public class MLP
                     layers[step].UpdateWeight(learningRate, momentum);
                 }
             }
+            var current_loss = CalculateLoss(predictions, labels, _errorFunction);
 
-            var accuracy = CalculateAccuracy(predictions, labels);
-            var current_loss = CalculateLoss(predictions, labels);
-            Console.WriteLine($"Epoch: {e}, Loss: {current_loss}, dLoss: {loss - current_loss}, Accuracy: {accuracy}");
+            if (!isRegression)
+            {
+                var accuracy = CalculateAccuracy(predictions, labels);
+                Console.WriteLine($"Epoch: {e}, Loss: {current_loss}, dLoss: {loss - current_loss}, Accuracy: {accuracy}");
+            }
+            else
+            {
+                Console.WriteLine($"Epoch: {e}, Loss: {current_loss}, dLoss: {loss - current_loss}");
+            }
+            
             loss = current_loss;
         }
     }
 
-    private double CalculateLoss(Matrix<double> preds, Matrix<double> labels)
+    public static double CalculateLoss(Matrix<double> preds, Matrix<double> labels, IErrorFunction errorFunction)
     {
         double result = 0;
         for (int i = 0; i < preds.RowCount; i++)
@@ -88,7 +96,7 @@ public class MLP
             {
                 var x = preds[i, j];
                 var y = labels[i, j];
-                result += _errorFunction.Value(y, x);
+                result += errorFunction.Value(y, x);
             }
         }
         
