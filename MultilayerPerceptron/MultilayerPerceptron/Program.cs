@@ -12,14 +12,14 @@ class Program
         (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.three_gauss.train.10000.csv");
         (var trainInputs, var trainLabels) = ProcessClassification(trainInputsRaw, trainLabelsRaw);
 
-
         Layer[] layers = {new Layer(trainInputsRaw.GetLength(1)), new Layer(5), new Layer(trainLabels.ColumnCount)};
 
         var errorFunction = ErrorFunctions.Square;
         var activationFunction = ActivationFunctions.Sigmoid;
 
-        var mlp = new MLP(layers, errorFunction, activationFunction, 0.01f, 0f);
-        mlp.Fit(50, trainInputs, trainLabels);
+
+        var mlp = new MLP(layers, errorFunction, activationFunction, 0.001f, 0f);
+        mlp.Fit(100, trainInputs, trainLabels);
 
         (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.three_gauss.test.10000.csv");
         (var testInputs, var testLabels) = ProcessClassification(testInputsRaw, testLabelsRaw);
@@ -27,6 +27,8 @@ class Program
         var predictions = mlp.Predict(testInputs);
         var accuracy = MLP.CalculateAccuracy(predictions, testLabels);
         Console.WriteLine(accuracy);
+        Visualizer.VisualizeClassification("test", testInputs, Vector<double>.Build.DenseOfArray(testLabelsRaw));
+        Visualizer.VisualizeClassification("predictions", testInputs, Vector<double>.Build.DenseOfArray(MLP.PredictedClasses(predictions)));
     }
 
     public static (Matrix<double>, Matrix<double>) ProcessClassification(double[,] inputs, double[] labels)
