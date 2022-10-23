@@ -134,4 +134,16 @@ public class MLP
         }
         return predicted;
     }
+
+    public static double[] PredictedClasses(Matrix<double> preds)
+    {
+        var classes = new double[preds.RowCount];
+        for (int i = 0; i < preds.RowCount; i++)
+        {
+            var x = preds.Row(i).MaximumIndex();
+            classes[i] = x + 1;
+        }
+
+        return classes;
+    }
 }
