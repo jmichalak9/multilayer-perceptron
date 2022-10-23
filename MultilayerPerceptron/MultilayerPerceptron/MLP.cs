@@ -113,7 +113,7 @@ public class MLP
 
     public Matrix<double> Predict(Matrix<double> data)
     {
-        var predicted = Matrix<double>.Build.Dense(data.RowCount,data.ColumnCount);
+        var predicted = Matrix<double>.Build.Dense(data.RowCount,layers[layers.Length - 1].width);
         for (int i = 0; i < data.RowCount; i++)
         {
             var activations = data.Row(i);

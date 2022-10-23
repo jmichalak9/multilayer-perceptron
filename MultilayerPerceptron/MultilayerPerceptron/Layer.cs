@@ -11,7 +11,7 @@ public class Layer
     private Matrix<double> weights;
     Matrix<double> weightsChange;
     private Vector<double> biases;
-    private readonly int width;
+    public readonly int width;
     
     // backprop
     private Vector<double> lastZ;

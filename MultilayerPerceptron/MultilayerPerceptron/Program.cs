@@ -9,19 +9,19 @@ class Program
     public static void Main()
     {
         Console.WriteLine("Training data path");
-        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.simple.train.10000.csv");
+        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.three_gauss.train.10000.csv");
+        (var trainInputs, var trainLabels) = ProcessClassification(trainInputsRaw, trainLabelsRaw);
 
 
-        Layer[] layers = {new Layer(trainInputsRaw.GetLength(1)), new Layer(3), new Layer(2)};
+        Layer[] layers = {new Layer(trainInputsRaw.GetLength(1)), new Layer(3), new Layer(trainLabels.ColumnCount)};
 
-        var errorFunction = ErrorFunctions.PseudoHuber(0.1);
+        var errorFunction = ErrorFunctions.Square;
         var activationFunction = ActivationFunctions.Sigmoid;
 
         var mlp = new MLP(layers, errorFunction, activationFunction, 0.001f, 0f);
-        (var trainInputs, var trainLabels) = ProcessClassification(trainInputsRaw, trainLabelsRaw);
-        mlp.Fit(200, trainInputs, trainLabels);
+        mlp.Fit(50, trainInputs, trainLabels);
 
-        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.simple.test.10000.csv");
+        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.three_gauss.test.10000.csv");
         (var testInputs, var testLabels) = ProcessClassification(testInputsRaw, testLabelsRaw);
 
         var predictions = mlp.Predict(testInputs);
