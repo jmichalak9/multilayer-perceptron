@@ -4,52 +4,74 @@ using MathNet.Numerics.LinearAlgebra;
 using MultilayerPerceptron;
 using System.Globalization;
 
-Console.WriteLine("Training data path");
-var trainingPath = Console.ReadLine();
-
-var trainingData = File.ReadAllLines(trainingPath);
-
-// Skip headers
-trainingData = trainingData.Skip(1).ToArray();
-
-var dataLength = trainingData.Length;
-var inputSize = trainingData.First().Split(',').Length;
-var inputMatrix = new double[dataLength, inputSize];
-var labels = new double[dataLength];
-for (int j = 0; j < dataLength; j++)
+class Program
 {
-    var line = trainingData[j];
-
-    var numbers = line.Split(',');
-    for (int i = 0; i < numbers.Length; i++)
+    public static void Main()
     {
-        if (i == numbers.Length - 1)
+        Console.WriteLine("Training data path");
+        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.simple.train.10000.csv");
+
+
+        Layer[] layers = {new Layer(trainInputsRaw.GetLength(1)), new Layer(3), new Layer(2)};
+
+        var errorFunction = ErrorFunctions.PseudoHuber(0.1);
+        var activationFunction = ActivationFunctions.Sigmoid;
+
+        var mlp = new MLP(layers, errorFunction, activationFunction, 0.001f, 0f);
+        (var trainInputs, var trainLabels) = ProcessClassification(trainInputsRaw, trainLabelsRaw);
+        mlp.Fit(200, trainInputs, trainLabels);
+
+        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.simple.test.10000.csv");
+        (var testInputs, var testLabels) = ProcessClassification(testInputsRaw, testLabelsRaw);
+
+        var predictions = mlp.Predict(testInputs);
+        var accuracy = MLP.CalculateAccuracy(predictions, testLabels);
+        Console.WriteLine(accuracy);
+    }
+
+    public static (Matrix<double>, Matrix<double>) ProcessClassification(double[,] inputs, double[] labels)
+    {
+        var classNumber = (int)labels.Cast<double>().Max();
+
+        var outputMatrix = new double[labels.Length, classNumber];
+        for (int i = 0; i < labels.Length; i++)
         {
-            inputMatrix[j, i] = 1; //bias
-            labels[j] = double.Parse(numbers[i], CultureInfo.InvariantCulture.NumberFormat);
-            break;
+            outputMatrix[i, (int)labels[i] - 1] = 1;
         }
 
-        inputMatrix[j, i] = double.Parse(numbers[i], CultureInfo.InvariantCulture.NumberFormat);
+        var boolInputs = Matrix<double>.Build.DenseOfArray(inputs);
+        var outputLabels = Matrix<double>.Build.DenseOfArray(outputMatrix);
+        return (boolInputs, outputLabels);
+    }
+
+    public static (double[,], double[]) ReadDataFromFile(string filepath)
+    {
+        var trainingData = File.ReadAllLines(filepath);
+
+        // Skip headers
+        trainingData = trainingData.Skip(1).ToArray();
+
+        var dataLength = trainingData.Length;
+        var inputSize = trainingData.First().Split(',').Length;
+        var inputMatrix = new double[dataLength, inputSize];
+        var labels = new double[dataLength];
+        for (int j = 0; j < dataLength; j++)
+        {
+            var line = trainingData[j];
+
+            var numbers = line.Split(',');
+            for (int i = 0; i < numbers.Length; i++)
+            {
+                if (i == numbers.Length - 1)
+                {
+                    inputMatrix[j, i] = 1; //bias
+                    labels[j] = double.Parse(numbers[i], CultureInfo.InvariantCulture.NumberFormat);
+                    break;
+                }
+
+                inputMatrix[j, i] = double.Parse(numbers[i], CultureInfo.InvariantCulture.NumberFormat);
+            }
+        }
+        return (inputMatrix, labels);
     }
 }
-
-var classNumber = (int)labels.Cast<double>().Max();
-
-var outputMatrix = new double[dataLength, classNumber];
-for (int i = 0; i < dataLength; i++)
-{
-    outputMatrix[i, (int)labels[i] - 1] = 1;
-}
-
-var boolInputs = Matrix<double>.Build.DenseOfArray(inputMatrix);
-var outputLabels = Matrix<double>.Build.DenseOfArray(outputMatrix);
-
-Layer[] layers = {new Layer(inputSize), new Layer(3), new Layer(2)};
-
-var errorFunction = ErrorFunctions.Square;
-var activationFunction = ActivationFunctions.Sigmoid;
-
-var mlp = new MLP(layers, errorFunction, activationFunction, 0.001f);
-
-mlp.Fit(5000, boolInputs, outputLabels);

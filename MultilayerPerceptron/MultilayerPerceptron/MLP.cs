@@ -5,14 +5,16 @@ namespace MultilayerPerceptron;
 public class MLP
 {
     private double learningRate;
+    private double momentum;
     private Random _rng;
     private Layer[] layers;
     private IErrorFunction _errorFunction;
 
-    public MLP(Layer[] layers, IErrorFunction errorFunction, IActivationFunction activationFunction, double learningRate)
+    public MLP(Layer[] layers, IErrorFunction errorFunction, IActivationFunction activationFunction, double learningRate, double momentum)
     {
         this.layers = layers;
         this.learningRate = learningRate;
+        this.momentum = momentum;
         _errorFunction = errorFunction;
 
         _rng = new Random();
@@ -66,7 +68,7 @@ public class MLP
 
                 for (int step = 1; step < layers.Length; step++)
                 {
-                    layers[step].UpdateWeight(learningRate, 0);
+                    layers[step].UpdateWeight(learningRate, momentum);
                 }
             }
 
@@ -93,7 +95,7 @@ public class MLP
         return result / preds.RowCount;
     }
 
-    private double CalculateAccuracy(Matrix<double> preds, Matrix<double> labels)
+    public static double CalculateAccuracy(Matrix<double> preds, Matrix<double> labels)
     {
         int hit = 0;
         for (int i = 0; i < preds.RowCount; i++)
@@ -111,7 +113,7 @@ public class MLP
 
     public Matrix<double> Predict(Matrix<double> data)
     {
-        var predicted = Matrix<double>.Build.Dense(data.RowCount,data.ColumnCount);
+        var predicted = Matrix<double>.Build.Dense(data.RowCount,data.ColumnCount-1);
         for (int i = 0; i < data.RowCount; i++)
         {
             var activations = data.Row(i);
