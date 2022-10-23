@@ -13,12 +13,12 @@ class Program
         (var trainInputs, var trainLabels) = ProcessClassification(trainInputsRaw, trainLabelsRaw);
 
 
-        Layer[] layers = {new Layer(trainInputsRaw.GetLength(1)), new Layer(3), new Layer(trainLabels.ColumnCount)};
+        Layer[] layers = {new Layer(trainInputsRaw.GetLength(1)), new Layer(5), new Layer(trainLabels.ColumnCount)};
 
         var errorFunction = ErrorFunctions.Square;
         var activationFunction = ActivationFunctions.Sigmoid;
 
-        var mlp = new MLP(layers, errorFunction, activationFunction, 0.001f, 0f);
+        var mlp = new MLP(layers, errorFunction, activationFunction, 0.01f, 0f);
         mlp.Fit(50, trainInputs, trainLabels);
 
         (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.three_gauss.test.10000.csv");

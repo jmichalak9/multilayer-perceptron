@@ -44,8 +44,8 @@ public class MLP
             {
                 randomIndices[i] = i;
             }
-            var permutation = new Permutation(randomIndices);
             randomIndices = randomIndices.OrderBy(x => _rng.Next()).ToArray();
+            var permutation = new Permutation(randomIndices);
             data.PermuteRows(permutation);
             labels.PermuteRows(permutation);
 
@@ -121,6 +121,7 @@ public class MLP
             {
                 activations = layer.Forward(activations);
             }
+
             predicted.SetRow(i, activations);
         }
         return predicted;
