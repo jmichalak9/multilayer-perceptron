@@ -10,14 +10,14 @@ class Program
     private static int seed = 69;
     public static void Main()
     {
-        Classification();
-        //Regression();
+        //Classification();
+        Regression();
     }
 
     public static void Regression()
     {
         Console.WriteLine("Training data path");
-        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.cube.train.1000.csv");
+        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.cube.train.10000.csv");
 
         var outputMatrix = new double[trainLabelsRaw.Length, 1];
         for (int i = 0; i < trainLabelsRaw.Length; i++)
@@ -36,9 +36,9 @@ class Program
         var mlp = new MLP(layers, errorFunction, activationFunction, 0.1f, 0f, true, new Random(seed));
         mlp.Fit(200, trainInputs, trainOutput, true);
 
-        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.cube.test.1000.csv");
+        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.cube.train.10000.csv");
         outputMatrix = new double[testLabelsRaw.Length, 1];
-        for (int i = 0; i < trainLabelsRaw.Length; i++)
+        for (int i = 0; i < testLabelsRaw.Length; i++)
         {
             outputMatrix[i, 0] = testLabelsRaw[i];
         }

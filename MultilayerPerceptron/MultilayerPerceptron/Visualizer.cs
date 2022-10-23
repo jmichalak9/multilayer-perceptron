@@ -47,26 +47,22 @@ public class Visualizer
     }
     public static void VisualizeRegression(string name, Vector<double> x, Vector<double> y, Vector<double> predicted)
     {
-        var lineseries = new LineSeries[]{new OxyPlot.Series.LineSeries()
+        var lineseries = new ScatterSeries[]{new OxyPlot.Series.ScatterSeries()
             {
                 Title = "Real",
-                Color = OxyPlot.OxyColors.Blue,
-                StrokeThickness = 0,
                 MarkerSize = 2,
                 MarkerType = OxyPlot.MarkerType.Circle
-            }, new OxyPlot.Series.LineSeries()
+            }, new OxyPlot.Series.ScatterSeries()
             {
                 Title = $"Predicted",
-                Color = OxyPlot.OxyColors.Red,
-                StrokeThickness = 0,
                 MarkerSize = 2,
                 MarkerType = OxyPlot.MarkerType.Circle
             }
         };        
         for (int i = 0; i< x.Count; i++)
         {
-            lineseries[0].Points.Add(new DataPoint(x[i], y[i]));
-            lineseries[1].Points.Add(new DataPoint(x[i], predicted[i]));
+            lineseries[0].Points.Add(new ScatterPoint(x[i], y[i]));
+            lineseries[1].Points.Add(new ScatterPoint(x[i], predicted[i]));
         }
 
         var model = new OxyPlot.PlotModel
