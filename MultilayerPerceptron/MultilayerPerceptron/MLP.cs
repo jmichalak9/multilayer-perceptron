@@ -55,9 +55,9 @@ public class MLP
                     layer.Back(labels.Row(i));
                 }
             }
-
+            var accuracy = CalculateAccuracy(predictions, labels);
             loss = calculateLoss(predictions, labels);
-            Console.WriteLine($"{e} {loss}");
+            Console.WriteLine($"{e} {accuracy}");
         }
 
         return loss;
@@ -97,8 +97,19 @@ public class MLP
         return predicted;
     }
 
-    private void ValidateInputs()
+    private double CalculateAccuracy(Matrix<float> preds, Matrix<float> labels)
     {
-        
+        int hit = 0;
+        for (int i = 0; i < preds.RowCount; i++)
+        {
+            var x = preds.Row(i).MaximumIndex();
+            var y = labels.Row(i).MaximumIndex();
+            if (x == y)
+            {
+                hit++;
+            }
+        }
+
+        return (float)hit / (float)preds.RowCount;
     }
 }

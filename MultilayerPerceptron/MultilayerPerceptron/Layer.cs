@@ -93,10 +93,9 @@ public class Layer
             lastE = Vector<Single>.Build.Dense(width);
             for (int i = 0; i < weights.RowCount; i++)
             {
-                for (int j = 0; j < next.lastL.ColumnCount; j++)
+                for (int j = 0; j < next.lastL.RowCount; j++)
                 {
-                    lastE[i] = next.lastL[j, i];
-
+                    lastE[i] += next.lastL[j, i];
                 }
             }
         }
