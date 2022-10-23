@@ -45,11 +45,11 @@ for (int i = 0; i < dataLength; i++)
 var boolInputs = Matrix<double>.Build.DenseOfArray(inputMatrix);
 var outputLabels = Matrix<double>.Build.DenseOfArray(outputMatrix);
 
-Layer[] layers = {new Layer(inputSize), new Layer(inputSize + 10), new Layer(2)};
+Layer[] layers = {new Layer(inputSize), new Layer(3), new Layer(2)};
 
 var errorFunction = ErrorFunctions.Square;
 var activationFunction = ActivationFunctions.Sigmoid;
 
-var mlp = new MLP(layers, errorFunction, activationFunction, 0.1f);
+var mlp = new MLP(layers, errorFunction, activationFunction, 0.001f);
 
 mlp.Fit(5000, boolInputs, outputLabels);

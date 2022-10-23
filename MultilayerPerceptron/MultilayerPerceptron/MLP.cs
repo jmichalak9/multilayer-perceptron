@@ -33,6 +33,7 @@ public class MLP
 
     public void Fit(int epochs, Matrix<double> data, Matrix<double> labels)
     {
+        double loss = 0.0;
         for (int e = 0; e < epochs; e++)
         {
             // Randomize data order
@@ -41,8 +42,10 @@ public class MLP
             {
                 randomIndices[i] = i;
             }
+            var permutation = new Permutation(randomIndices);
             randomIndices = randomIndices.OrderBy(x => _rng.Next()).ToArray();
-            data.PermuteRows(new Permutation(randomIndices));
+            data.PermuteRows(permutation);
+            labels.PermuteRows(permutation);
 
             var predictions = Matrix<double>.Build.Dense(data.RowCount, labels.ColumnCount);
             for (int i = 0; i < data.RowCount; i++)
@@ -63,13 +66,14 @@ public class MLP
 
                 for (int step = 1; step < layers.Length; step++)
                 {
-                    layers[step].UpdateWeight(learningRate);
+                    layers[step].UpdateWeight(learningRate, 0);
                 }
             }
 
             var accuracy = CalculateAccuracy(predictions, labels);
-            double loss = CalculateLoss(predictions, labels);
-            Console.WriteLine($"Epoch: {e}, Loss: {loss}, Accuracy: {accuracy}");
+            var current_loss = CalculateLoss(predictions, labels);
+            Console.WriteLine($"Epoch: {e}, Loss: {current_loss}, dLoss: {loss - current_loss}, Accuracy: {accuracy}");
+            loss = current_loss;
         }
     }
 

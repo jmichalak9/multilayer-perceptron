@@ -9,6 +9,7 @@ public class Layer
     private IErrorFunction _errorFunction;
 
     private Matrix<double> weights;
+    Matrix<double> weightsChange;
     private Vector<double> biases;
     private readonly int width;
     
@@ -41,7 +42,7 @@ public class Layer
         {
             for (int j = 0; j < weights.ColumnCount; j++)
             {
-                weights[i, j] = rng.NextDouble();
+                weights[i, j] = rng.NextDouble() * 0.5;
             }
         }
 
@@ -78,12 +79,21 @@ public class Layer
             return;
         }
 
-        delta = (next.weights.Transpose().Multiply(next.delta)).PointwiseMultiply(lastZ.Map(_activationFunction.DerivativeValue));
+        delta = (next.delta * next.weights).PointwiseMultiply(lastZ.Map(_activationFunction.DerivativeValue));
     }
 
-    public void UpdateWeight(double learningRate)
+    public void UpdateWeight(double learningRate, double momentum)
     {
-        weights = weights.Subtract(learningRate * delta.OuterProduct(prev.lastActivations)); //OK
+        if (weightsChange == null)
+        {
+            weightsChange = -learningRate * delta.OuterProduct(prev.lastActivations);
+        }
+        else
+        {
+            weightsChange = -learningRate * delta.OuterProduct(prev.lastActivations) + momentum * weightsChange;
+        }
+        
+        weights += weightsChange; //OK
         biases -= delta;
     }
 }

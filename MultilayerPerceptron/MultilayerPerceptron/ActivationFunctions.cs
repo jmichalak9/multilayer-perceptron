@@ -14,12 +14,12 @@ namespace MultilayerPerceptron
         {
             public double DerivativeValue(double x)
             {
-                return Value(x) * (1 - Value(x));
+                return Value(x) * (1.0 - Value(x));
             }
 
             public double Value(double x)
             {
-                return (double)(1 / (1 + Math.Exp(-x)));
+                return (double)(1.0 / (1.0 + Math.Exp(-x)));
             }
         }
     }
