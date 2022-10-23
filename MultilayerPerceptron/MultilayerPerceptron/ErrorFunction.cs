@@ -53,7 +53,7 @@ namespace MultilayerPerceptron
                 {
                     return z * z / 2;
                 }
-                return delta* z - delta * delta / 2;
+                return delta * Math.Abs(z) - delta * delta / 2;
             }
         }
     }
