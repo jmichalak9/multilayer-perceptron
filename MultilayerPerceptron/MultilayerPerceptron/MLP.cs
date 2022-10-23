@@ -88,7 +88,7 @@ public class MLP
             {
                 var x = preds[i, j];
                 var y = labels[i, j];
-                result += _errorFunction.Value(x, y);
+                result += _errorFunction.Value(y, x);
             }
         }
         
@@ -113,7 +113,7 @@ public class MLP
 
     public Matrix<double> Predict(Matrix<double> data)
     {
-        var predicted = Matrix<double>.Build.Dense(data.RowCount,data.ColumnCount-1);
+        var predicted = Matrix<double>.Build.Dense(data.RowCount,data.ColumnCount);
         for (int i = 0; i < data.RowCount; i++)
         {
             var activations = data.Row(i);
