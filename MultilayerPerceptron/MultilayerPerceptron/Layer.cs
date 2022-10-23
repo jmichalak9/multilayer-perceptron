@@ -11,6 +11,7 @@ public class Layer
     private Matrix<double> weights;
     Matrix<double> weightsChange;
     private Vector<double> biases;
+    private bool withBiases;
     public readonly int width;
     
     // backprop
@@ -26,7 +27,7 @@ public class Layer
         this.width = width;
     }
 
-    public void Initialize(Layer prev, Layer next, IActivationFunction activationFunction, IErrorFunction errorFunction, Random rng)
+    public void Initialize(Layer prev, Layer next, IActivationFunction activationFunction, IErrorFunction errorFunction, bool withBiases, Random rng)
     {
         if (prev == null)
         {
@@ -35,7 +36,8 @@ public class Layer
 
         this.prev = prev;
         this.next = next;
-        biases = Vector<double>.Build.Random(width, new ContinuousUniform(0, 1));
+        this.withBiases = withBiases;
+        biases = Vector<double>.Build.Random(width, new ContinuousUniform(0, 1, rng));
         weights = Matrix<double>.Build.Dense(width, prev.width);
 
         for (int i = 0; i < weights.RowCount; i++)
@@ -58,7 +60,14 @@ public class Layer
             return data;
         }
 
-        lastZ = weights * data + biases;
+        if (withBiases)
+        {
+            lastZ = weights * data + biases;
+        }
+        else
+        {
+            lastZ = weights * data;
+        }
         lastActivations = lastZ.Map(_activationFunction.Value);
 
         return lastActivations;
@@ -94,6 +103,9 @@ public class Layer
         }
         
         weights += weightsChange; //OK
-        biases -= delta;
+        if (withBiases)
+        {
+            biases -= delta;
+        }
     }
 }

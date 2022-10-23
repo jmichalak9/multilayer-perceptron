@@ -10,14 +10,14 @@ public class MLP
     private Layer[] layers;
     private IErrorFunction _errorFunction;
 
-    public MLP(Layer[] layers, IErrorFunction errorFunction, IActivationFunction activationFunction, double learningRate, double momentum)
+    public MLP(Layer[] layers, IErrorFunction errorFunction, IActivationFunction activationFunction, double learningRate, double momentum, bool withBiases, Random rng)
     {
         this.layers = layers;
         this.learningRate = learningRate;
         this.momentum = momentum;
         _errorFunction = errorFunction;
 
-        _rng = new Random();
+        _rng = rng;
         Layer prev = null;
         // initialize
         for (int i = 0; i < layers.Length; i++)
@@ -28,7 +28,7 @@ public class MLP
                 next = layers[i + 1];
             }
 
-            layers[i].Initialize(prev, next, activationFunction, errorFunction, _rng);
+            layers[i].Initialize(prev, next, activationFunction, errorFunction, withBiases, _rng);
             prev = layers[i];
         }
     }
