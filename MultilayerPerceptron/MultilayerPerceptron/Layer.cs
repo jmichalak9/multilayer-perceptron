@@ -22,9 +22,10 @@ public class Layer
     private Layer prev;
     private Layer next;
     
-    public Layer(int width)
+    public Layer(int width, IActivationFunction activationFunction = null)
     {
         this.width = width;
+        _activationFunction = activationFunction;
     }
 
     public void Initialize(Layer prev, Layer next, IActivationFunction activationFunction, IErrorFunction errorFunction, bool withBiases, Random rng)
@@ -48,7 +49,10 @@ public class Layer
             }
         }
 
-        _activationFunction = activationFunction;
+        if(_activationFunction == null)
+        {
+            _activationFunction = activationFunction;
+        }
         _errorFunction = errorFunction;
     }
 
