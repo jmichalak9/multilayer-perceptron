@@ -1,13 +1,11 @@
 ﻿// See https://aka.ms/new-console-template for more information
-
 using MathNet.Numerics.LinearAlgebra;
 using MultilayerPerceptron;
 using System.Globalization;
-using System.Reflection.Emit;
 
 class Program
 {
-    private static int seed = 69;
+    private static int seed = 2137;
     public static void Main()
     {
         //Classification();
@@ -17,7 +15,9 @@ class Program
     public static void Regression()
     {
         Console.WriteLine("Training data path");
-        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.activation.train.1000.csv");
+        //(var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.activation.train.1000.csv");
+        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.cube.train.10000.csv");
+
 
         var outputMatrix = new double[trainLabelsRaw.Length, 1];
         for (int i = 0; i < trainLabelsRaw.Length; i++)
@@ -28,16 +28,19 @@ class Program
         var trainInputs = Matrix<double>.Build.DenseOfArray(trainInputsRaw);
         var trainOutput = Matrix<double>.Build.DenseOfArray(outputMatrix);
 
-        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(5), new Layer(1) };
-
         var errorFunction = ErrorFunctions.Square;
-        var activationFunction = ActivationFunctions.Linear(0.01);
+        //var activationFunction = ActivationFunctions.ReLU;
+        var activationFunction = ActivationFunctions.Linear(0.1);
 
-        var mlp = new MLP(layers, errorFunction, activationFunction, 0.1f, 0f, true, new Random(seed));
-        mlp.Fit(3000, trainInputs, trainOutput, true);
+        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(1, ActivationFunctions.Linear(0.1)) };
+
+        var mlp = new MLP(layers, errorFunction, activationFunction, 0.01f, 0f, true, new Random(seed));
+        mlp.Fit(200, trainInputs, trainOutput, true);
         var train_predictions = mlp.Predict(trainInputs);
 
-        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.activation.test.1000.csv");
+        //(var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.activation.test.1000.csv");
+        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.cube.test.10000.csv");
+
         outputMatrix = new double[testLabelsRaw.Length, 1];
         for (int i = 0; i < testLabelsRaw.Length; i++)
         {
