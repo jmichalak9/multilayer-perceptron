@@ -17,7 +17,7 @@ class Program
     public static void Regression()
     {
         Console.WriteLine("Training data path");
-        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.cube.train.10000.csv");
+        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.activation.train.1000.csv");
 
         var outputMatrix = new double[trainLabelsRaw.Length, 1];
         for (int i = 0; i < trainLabelsRaw.Length; i++)
@@ -28,15 +28,16 @@ class Program
         var trainInputs = Matrix<double>.Build.DenseOfArray(trainInputsRaw);
         var trainOutput = Matrix<double>.Build.DenseOfArray(outputMatrix);
 
-        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(5), new Layer(5), new Layer(5), new Layer(1) };
+        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(5), new Layer(1) };
 
         var errorFunction = ErrorFunctions.Square;
-
         var activationFunction = ActivationFunctions.Linear(0.01);
-        var mlp = new MLP(layers, errorFunction, activationFunction, 0.1f, 0f, true, new Random(seed));
-        mlp.Fit(200, trainInputs, trainOutput, true);
 
-        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.cube.train.10000.csv");
+        var mlp = new MLP(layers, errorFunction, activationFunction, 0.1f, 0f, true, new Random(seed));
+        mlp.Fit(3000, trainInputs, trainOutput, true);
+        var train_predictions = mlp.Predict(trainInputs);
+
+        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.activation.test.1000.csv");
         outputMatrix = new double[testLabelsRaw.Length, 1];
         for (int i = 0; i < testLabelsRaw.Length; i++)
         {
@@ -46,10 +47,11 @@ class Program
         var testInputs = Matrix<double>.Build.DenseOfArray(testInputsRaw);
         var testOutput = Matrix<double>.Build.DenseOfArray(outputMatrix);
 
-        var predictions = mlp.Predict(testInputs);
-        var loss = MLP.CalculateLoss(predictions, testOutput, ErrorFunctions.Square);
+        var test_predictions = mlp.Predict(testInputs);
+        var loss = MLP.CalculateLoss(test_predictions, testOutput, ErrorFunctions.Square);
         Console.WriteLine(loss);
-        Visualizer.VisualizeRegression("activation", testInputs.Column(0), testOutput.Column(0), predictions.Column(0));
+        Visualizer.VisualizeRegression("regression_train", trainInputs.Column(0), trainOutput.Column(0), train_predictions.Column(0));
+        Visualizer.VisualizeRegression("regression_test", testInputs.Column(0), testOutput.Column(0), test_predictions.Column(0));
     }
 
     public static void Classification()
@@ -73,8 +75,8 @@ class Program
         var predictions = mlp.Predict(testInputs);
         var accuracy = MLP.CalculateAccuracy(predictions, testLabels);
         Console.WriteLine(accuracy);
-        Visualizer.VisualizeClassification("test", testInputs, Vector<double>.Build.DenseOfArray(testLabelsRaw));
-        Visualizer.VisualizeClassification("predictions", testInputs, Vector<double>.Build.DenseOfArray(MLP.PredictedClasses(predictions)));
+        Visualizer.VisualizeClassification("classification_test", testInputs, Vector<double>.Build.DenseOfArray(testLabelsRaw));
+        Visualizer.VisualizeClassification("classification_predictions", testInputs, Vector<double>.Build.DenseOfArray(MLP.PredictedClasses(predictions)));
     }
 
     public static (Matrix<double>, Matrix<double>) ProcessClassification(double[,] inputs, double[] labels)

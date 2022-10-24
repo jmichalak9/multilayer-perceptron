@@ -36,34 +36,34 @@ public class MLP
     public void Fit(int epochs, Matrix<double> data, Matrix<double> labels, bool isRegression = false)
     {
         double loss = 0.0;
+
+        var randomIndices = new int[data.RowCount];
+        for (int i = 0; i < randomIndices.Length; i++)
+        {
+            randomIndices[i] = i;
+        }
+
         for (int e = 0; e < epochs; e++)
         {
             // Randomize data order
-            var randomIndices = new int[data.RowCount];
-            for (int i = 0; i < randomIndices.Length; i++)
-            {
-                randomIndices[i] = i;
-            }
             randomIndices = randomIndices.OrderBy(x => _rng.Next()).ToArray();
-            var permutation = new Permutation(randomIndices);
-            data.PermuteRows(permutation);
-            labels.PermuteRows(permutation);
 
             var predictions = Matrix<double>.Build.Dense(data.RowCount, labels.ColumnCount);
-            for (int i = 0; i < data.RowCount; i++)
+            for (int k = 0; k < randomIndices.Length; k++)
             {
-                var activations = data.Row(i);
+                var currentRow = randomIndices[k];
+                var activations = data.Row(currentRow);
                 foreach (var layer in layers)
                 {
                     activations = layer.Forward(activations);
                 }
 
-                predictions.SetRow(i, activations);
+                predictions.SetRow(currentRow, activations);
 
                 for (int j = layers.Length - 1; j > 0; j--)
                 {
                     var layer = layers[j];
-                    layer.Back(labels.Row(i));
+                    layer.Back(labels.Row(currentRow));
                 }
 
                 for (int step = 1; step < layers.Length; step++)
