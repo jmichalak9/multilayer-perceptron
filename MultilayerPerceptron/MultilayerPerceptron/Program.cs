@@ -2,14 +2,15 @@
 using MathNet.Numerics.LinearAlgebra;
 using MultilayerPerceptron;
 using System.Globalization;
+using System.Text;
 
 class Program
 {
     private static int seed = 2137;
     public static void Main()
     {
-        //Classification();
-        Regression();
+        Classification();
+        //Regression();
     }
 
     public static void Regression()
@@ -30,12 +31,15 @@ class Program
 
         var errorFunction = ErrorFunctions.Square;
         //var activationFunction = ActivationFunctions.ReLU;
-        var activationFunction = ActivationFunctions.Linear(0.1);
+        var activationFunction = ActivationFunctions.Linear(0.001);
 
-        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(1, ActivationFunctions.Linear(0.1)) };
-
-        var mlp = new MLP(layers, errorFunction, activationFunction, 0.01f, 0f, true, new Random(seed));
-        mlp.Fit(200, trainInputs, trainOutput, true);
+        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(5), new Layer(5),new Layer(1, ActivationFunctions.Linear(0.1)) };
+        var weightSW = new StreamWriter("../../../../../weights.txt");
+        var lossSW = new StreamWriter("../../../../../loss.txt");
+        var mlp = new MLP(layers, errorFunction, activationFunction, 0.1f, 0f, true, new Random(seed), weightSW, lossSW);
+        weightSW.Close();
+        lossSW.Close();
+        mlp.Fit(1000, trainInputs, trainOutput, true);
         var train_predictions = mlp.Predict(trainInputs);
 
         //(var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.activation.test.1000.csv");
@@ -63,14 +67,18 @@ class Program
         (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.three_gauss.train.1000.csv");
         (var trainInputs, var trainLabels) = ProcessClassification(trainInputsRaw, trainLabelsRaw);
 
-        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(5), new Layer(trainLabels.ColumnCount) };
+        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(trainLabels.ColumnCount) };
 
         var errorFunction = ErrorFunctions.Square;
         var activationFunction = ActivationFunctions.Sigmoid;
 
+        var weightSW = new StreamWriter("../../../../../weights.txt");
+        var lossSW = new StreamWriter("../../../../../loss.txt");
 
-        var mlp = new MLP(layers, errorFunction, activationFunction, 0.001f, 0f, true, new Random(seed));
-        mlp.Fit(250, trainInputs, trainLabels);
+        var mlp = new MLP(layers, errorFunction, activationFunction, 0.1f, 0f, true, new Random(seed), weightSW, lossSW);
+        mlp.Fit(100, trainInputs, trainLabels);
+        weightSW.Close();
+        lossSW.Close();
 
         (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.three_gauss.test.1000.csv");
         (var testInputs, var testLabels) = ProcessClassification(testInputsRaw, testLabelsRaw);

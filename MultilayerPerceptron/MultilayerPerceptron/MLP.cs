@@ -1,3 +1,4 @@
+using System.Text;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 
@@ -10,13 +11,16 @@ public class MLP
     private Layer[] layers;
     private IErrorFunction _errorFunction;
 
-    public MLP(Layer[] layers, IErrorFunction errorFunction, IActivationFunction activationFunction, double learningRate, double momentum, bool withBiases, Random rng)
+    private StreamWriter weightSW;
+    private StreamWriter lossSW;
+    public MLP(Layer[] layers, IErrorFunction errorFunction, IActivationFunction activationFunction, double learningRate, double momentum, bool withBiases, Random rng, StreamWriter weightSW, StreamWriter lossSW)
     {
         this.layers = layers;
         this.learningRate = learningRate;
         this.momentum = momentum;
         _errorFunction = errorFunction;
-
+        this.weightSW = weightSW;
+        this.lossSW = lossSW;
         _rng = rng;
         Layer prev = null;
         // initialize
@@ -28,7 +32,7 @@ public class MLP
                 next = layers[i + 1];
             }
 
-            layers[i].Initialize(prev, next, activationFunction, errorFunction, withBiases, _rng);
+            layers[i].Initialize(prev, next, activationFunction, errorFunction, withBiases, _rng, weightSW, lossSW, i);
             prev = layers[i];
         }
     }
@@ -82,11 +86,32 @@ public class MLP
             {
                 Console.WriteLine($"Epoch: {e}, Loss: {current_loss}, dLoss: {loss - current_loss}");
             }
-            
+
+            if (e % 50 == 0)
+            {
+                ExportWeights(e);
+                ExportLoss(e);
+            }
             loss = current_loss;
         }
     }
 
+    private void ExportWeights(int epoch)
+    {
+        weightSW.WriteLine($"epoch {epoch}");
+        for (int i = 0; i < layers.Length; i++)
+        {
+            layers[i].ExportWeights();
+        }
+    }
+    private void ExportLoss(int epoch)
+    {
+        lossSW.WriteLine($"epoch {epoch}");
+        for (int i = 0; i < layers.Length; i++)
+        {
+            layers[i].ExportLoss();
+        }
+    }
     public static double CalculateLoss(Matrix<double> preds, Matrix<double> labels, IErrorFunction errorFunction)
     {
         double result = 0;
