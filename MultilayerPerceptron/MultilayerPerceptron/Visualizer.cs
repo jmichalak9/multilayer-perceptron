@@ -11,13 +11,11 @@ public class Visualizer
         var numClasses = (int)labels.Maximum();
 
         var lineseries = new LineSeries[numClasses];
-        var colors = new OxyPlot.OxyColor[] { OxyPlot.OxyColors.Blue, OxyPlot.OxyColors.Red, OxyPlot.OxyColors.Green};
         for (int i = 0; i < numClasses; i++)
         {
             var line = new OxyPlot.Series.LineSeries()
             {
                 Title = $"Series {i}",
-                Color = colors[i],//OxyPlot.OxyColors.Blue,
                 StrokeThickness = 0,
                 MarkerSize = 2,
                 MarkerType = OxyPlot.MarkerType.Circle

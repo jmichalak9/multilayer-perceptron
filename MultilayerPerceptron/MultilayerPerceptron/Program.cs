@@ -6,19 +6,16 @@ using System.Text;
 
 class Program
 {
-    private static int seed = 2137;
+    private static int seed = 48;
     public static void Main()
     {
-        Classification();
-        //Regression();
+        //Classification();
+        Regression();
     }
 
     public static void Regression()
     {
-        Console.WriteLine("Training data path");
-        //(var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.activation.train.1000.csv");
-        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.cube.train.10000.csv");
-
+        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data_2/regression/data.multimodal.train.100.csv");
 
         var outputMatrix = new double[trainLabelsRaw.Length, 1];
         for (int i = 0; i < trainLabelsRaw.Length; i++)
@@ -28,22 +25,23 @@ class Program
 
         var trainInputs = Matrix<double>.Build.DenseOfArray(trainInputsRaw);
         var trainOutput = Matrix<double>.Build.DenseOfArray(outputMatrix);
-
+        
         var errorFunction = ErrorFunctions.Square;
-        //var activationFunction = ActivationFunctions.ReLU;
-        var activationFunction = ActivationFunctions.Linear(0.001);
+        var activationFunction = ActivationFunctions.Linear(0.1);
 
-        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(5), new Layer(5),new Layer(1, ActivationFunctions.Linear(0.1)) };
+        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(10), new Layer(1, ActivationFunctions.Linear(1)) };
         var weightSW = new StreamWriter("../../../../../weights.txt");
         var lossSW = new StreamWriter("../../../../../loss.txt");
-        var mlp = new MLP(layers, errorFunction, activationFunction, 0.1f, 0f, true, new Random(seed), weightSW, lossSW);
+
+        var mlp = new MLP(layers, errorFunction, activationFunction, 0.0001f, 0f, true, new Random(seed), weightSW, lossSW);
+        mlp.Fit(500, trainInputs, trainOutput, true);
+
         weightSW.Close();
         lossSW.Close();
-        mlp.Fit(1000, trainInputs, trainOutput, true);
+        
         var train_predictions = mlp.Predict(trainInputs);
 
-        //(var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.activation.test.1000.csv");
-        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/regression/data.cube.test.10000.csv");
+        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data_2/regression/data.multimodal.test.100.csv");
 
         outputMatrix = new double[testLabelsRaw.Length, 1];
         for (int i = 0; i < testLabelsRaw.Length; i++)
@@ -63,24 +61,24 @@ class Program
 
     public static void Classification()
     {
-        Console.WriteLine("Training data path");
-        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.three_gauss.train.1000.csv");
+        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data_2/clasification/data.circles.train.10000.csv");
         (var trainInputs, var trainLabels) = ProcessClassification(trainInputsRaw, trainLabelsRaw);
 
-        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(trainLabels.ColumnCount) };
+        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(4), new Layer(8), new Layer(trainLabels.ColumnCount) };
 
         var errorFunction = ErrorFunctions.Square;
-        var activationFunction = ActivationFunctions.Sigmoid;
+        var activationFunction = ActivationFunctions.Tanh;
 
         var weightSW = new StreamWriter("../../../../../weights.txt");
         var lossSW = new StreamWriter("../../../../../loss.txt");
 
         var mlp = new MLP(layers, errorFunction, activationFunction, 0.1f, 0f, true, new Random(seed), weightSW, lossSW);
-        mlp.Fit(100, trainInputs, trainLabels);
+        mlp.Fit(200, trainInputs, trainLabels);
+        
         weightSW.Close();
         lossSW.Close();
 
-        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/classification/data.three_gauss.test.1000.csv");
+        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data_2/clasification/data.circles.test.10000.csv");
         (var testInputs, var testLabels) = ProcessClassification(testInputsRaw, testLabelsRaw);
 
         var predictions = mlp.Predict(testInputs);
