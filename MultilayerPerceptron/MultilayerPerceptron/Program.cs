@@ -9,8 +9,8 @@ class Program
     private static int seed = 48;
     public static void Main()
     {
-        //Classification();
-        Regression();
+        Classification();
+        //Regression();
     }
 
     public static void Regression()
@@ -29,7 +29,7 @@ class Program
         var errorFunction = ErrorFunctions.Square;
         var activationFunction = ActivationFunctions.Linear(0.1);
 
-        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(10), new Layer(1, ActivationFunctions.Linear(1)) };
+        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(10), new Layer(1, ActivationFunctions.Linear(0.1)) };
         var weightSW = new StreamWriter("../../../../../weights.txt");
         var lossSW = new StreamWriter("../../../../../loss.txt");
 
