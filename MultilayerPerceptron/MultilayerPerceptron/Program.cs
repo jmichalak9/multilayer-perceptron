@@ -9,8 +9,9 @@ class Program
     private static int seed = 48;
     public static void Main()
     {
-        Classification();
+        //Classification();
         //Regression();
+        MNIST();
     }
 
     public static void Regression()
@@ -59,12 +60,35 @@ class Program
         Visualizer.VisualizeRegression("regression_test", testInputs.Column(0), testOutput.Column(0), test_predictions.Column(0));
     }
 
+    public static void MNIST()
+    {
+        var mnist = new MNIST("../../../../../data/mnist");
+        var errorFunction = ErrorFunctions.Square;
+        var activationFunction = ActivationFunctions.Sigmoid;
+
+        var weightSW = new StreamWriter("../../../../../weights.txt");
+        var lossSW = new StreamWriter("../../../../../loss.txt");
+
+        Layer[] layers = { new Layer(mnist.trainInputs.ColumnCount), new Layer(64), new Layer(mnist.trainLabels.ColumnCount) };
+        var mlp = new MLP(layers, errorFunction, activationFunction, 0.1f, 0f, true, new Random(seed), weightSW, lossSW);
+        mlp.Fit(1000, mnist.trainInputs, mnist.trainLabels);
+        weightSW.Close();
+        lossSW.Close();
+        
+        var predictions = mlp.Predict(mnist.testInputs);
+        var accuracy = MLP.CalculateAccuracy(predictions, mnist.testLabels);
+        Console.WriteLine(accuracy);
+
+    }
+
     public static void Classification()
     {
-        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data_2/clasification/data.circles.train.10000.csv");
+
+        Console.WriteLine("Training data path");
+        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/projekt1-oddanie/clasification/data.noisyXOR.train.1000.csv");
         (var trainInputs, var trainLabels) = ProcessClassification(trainInputsRaw, trainLabelsRaw);
 
-        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(4), new Layer(8), new Layer(trainLabels.ColumnCount) };
+        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(2), new Layer(trainLabels.ColumnCount) };
 
         var errorFunction = ErrorFunctions.Square;
         var activationFunction = ActivationFunctions.Tanh;
@@ -73,12 +97,11 @@ class Program
         var lossSW = new StreamWriter("../../../../../loss.txt");
 
         var mlp = new MLP(layers, errorFunction, activationFunction, 0.1f, 0f, true, new Random(seed), weightSW, lossSW);
-        mlp.Fit(200, trainInputs, trainLabels);
-        
+        mlp.Fit(1000, trainInputs, trainLabels);
         weightSW.Close();
         lossSW.Close();
 
-        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data_2/clasification/data.circles.test.10000.csv");
+        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/projekt1-oddanie/clasification/data.noisyXOR.test.1000.csv");
         (var testInputs, var testLabels) = ProcessClassification(testInputsRaw, testLabelsRaw);
 
         var predictions = mlp.Predict(testInputs);
