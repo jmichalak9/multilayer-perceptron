@@ -2,7 +2,6 @@
 using MathNet.Numerics.LinearAlgebra;
 using MultilayerPerceptron;
 using System.Globalization;
-using System.Text;
 
 class Program
 {
@@ -28,14 +27,14 @@ class Program
         var trainOutput = Matrix<double>.Build.DenseOfArray(outputMatrix);
         
         var errorFunction = ErrorFunctions.Square;
-        var activationFunction = ActivationFunctions.Linear(0.1);
+        var activationFunction = ActivationFunctions.Sigmoid;
 
-        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(10), new Layer(1, ActivationFunctions.Linear(0.1)) };
+        Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(300), new Layer(200), new Layer(1, ActivationFunctions.Linear(1)) };
         var weightSW = new StreamWriter("../../../../../weights.txt");
         var lossSW = new StreamWriter("../../../../../loss.txt");
 
-        var mlp = new MLP(layers, errorFunction, activationFunction, 0.0001f, 0f, true, new Random(seed), weightSW, lossSW);
-        mlp.Fit(500, trainInputs, trainOutput, true);
+        var mlp = new MLP(layers, errorFunction, activationFunction, 0.00001f, 0.5f, true, new Random(seed), weightSW, lossSW);
+        mlp.Fit(10000, trainInputs, trainOutput, true);
 
         weightSW.Close();
         lossSW.Close();
@@ -64,28 +63,27 @@ class Program
     {
         var mnist = new MNIST("../../../../../data/mnist");
         var errorFunction = ErrorFunctions.Square;
-        var activationFunction = ActivationFunctions.Sigmoid;
+        var activationFunction = ActivationFunctions.Tanh;
 
         var weightSW = new StreamWriter("../../../../../weights.txt");
         var lossSW = new StreamWriter("../../../../../loss.txt");
 
-        Layer[] layers = { new Layer(mnist.trainInputs.ColumnCount), new Layer(64), new Layer(mnist.trainLabels.ColumnCount) };
-        var mlp = new MLP(layers, errorFunction, activationFunction, 0.1f, 0f, true, new Random(seed), weightSW, lossSW);
-        mlp.Fit(1000, mnist.trainInputs, mnist.trainLabels);
+        Layer[] layers = { new Layer(mnist.trainInputs.ColumnCount), new Layer(300), new Layer(300), new Layer(mnist.trainLabels.ColumnCount) };
+        var mlp = new MLP(layers, errorFunction, activationFunction, 0.01f, 0.5f, true, new Random(seed), weightSW, lossSW);
+        mlp.Fit(500, mnist.trainInputs, mnist.trainLabels);
         weightSW.Close();
         lossSW.Close();
         
         var predictions = mlp.Predict(mnist.testInputs);
         var accuracy = MLP.CalculateAccuracy(predictions, mnist.testLabels);
         Console.WriteLine(accuracy);
-
     }
 
     public static void Classification()
     {
 
         Console.WriteLine("Training data path");
-        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data/projekt1-oddanie/clasification/data.noisyXOR.train.1000.csv");
+        (var trainInputsRaw, var trainLabelsRaw) = ReadDataFromFile("../../../../../data_2/clasification/data.noisyXOR.train.1000.csv");
         (var trainInputs, var trainLabels) = ProcessClassification(trainInputsRaw, trainLabelsRaw);
 
         Layer[] layers = { new Layer(trainInputsRaw.GetLength(1)), new Layer(2), new Layer(trainLabels.ColumnCount) };
@@ -101,7 +99,7 @@ class Program
         weightSW.Close();
         lossSW.Close();
 
-        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data/projekt1-oddanie/clasification/data.noisyXOR.test.1000.csv");
+        (var testInputsRaw, var testLabelsRaw) = ReadDataFromFile("../../../../../data_2/clasification/data.noisyXOR.test.1000.csv");
         (var testInputs, var testLabels) = ProcessClassification(testInputsRaw, testLabelsRaw);
 
         var predictions = mlp.Predict(testInputs);
@@ -154,6 +152,7 @@ class Program
                 inputMatrix[j, i] = double.Parse(numbers[i], CultureInfo.InvariantCulture.NumberFormat);
             }
         }
+
         return (inputMatrix, labels);
     }
 }

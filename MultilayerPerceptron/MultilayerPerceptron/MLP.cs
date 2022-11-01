@@ -55,10 +55,6 @@ public class MLP
             var predictions = Matrix<double>.Build.Dense(data.RowCount, labels.ColumnCount);
             for (int k = 0; k < randomIndices.Length; k++)
             {
-                if (k % 100 == 0)
-                {
-                    Console.WriteLine(k);
-                }
                 var currentRow = randomIndices[k];
                 var activations = data.Row(currentRow);
                 foreach (var layer in layers)
@@ -91,11 +87,11 @@ public class MLP
                 Console.WriteLine($"Epoch: {e}, Loss: {current_loss}, dLoss: {loss - current_loss}");
             }
 
-            if (e % 50 == 0)
-            {
-                ExportWeights(e);
-                ExportLoss(e);
-            }
+            //if (e % 50 == 0)
+            //{
+            //    ExportWeights(e);
+            //    ExportLoss(e);
+            //}
             loss = current_loss;
         }
     }

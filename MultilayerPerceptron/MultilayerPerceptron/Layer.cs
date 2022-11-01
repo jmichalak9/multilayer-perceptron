@@ -46,14 +46,15 @@ public class Layer
         this.weightSW = weightSW;
         this.lossSW = lossSW;
         this.withBiases = withBiases;
-        biases = Vector<double>.Build.Random(width, new ContinuousUniform(0, 1, rng));
+        biases = Vector<double>.Build.Random(width, new ContinuousUniform(-1, 1, rng));
+        //biases *= 0.01;
         weights = Matrix<double>.Build.Dense(width, prev.width);
 
         for (int i = 0; i < weights.RowCount; i++)
         {
             for (int j = 0; j < weights.ColumnCount; j++)
             {
-                weights[i, j] = rng.NextDouble() * 0.5;
+                weights[i, j] = (rng.NextDouble() * 2.0 - 1.0);// * 0.01;
             }
         }
 
@@ -89,6 +90,7 @@ public class Layer
     {
         if (next == null)
         {
+            var softmax = ActivationFunctions.SoftMax;
             var errors = new double[labels.Count];
             for (int i = 0; i < labels.Count; i++)
             {
@@ -96,7 +98,10 @@ public class Layer
             }
 
             var dE = Vector<double>.Build.DenseOfArray(errors);
-            delta = dE.PointwiseMultiply(lastZ.Map(_activationFunction.DerivativeValue)); //OK
+            var da = softmax.DerivativeValue(lastZ);
+            var test = da.Row(0);
+            delta = da * dE;
+            //delta = dE.PointwiseMultiply(lastZ.Map(_activationFunction.DerivativeValue)); //OK
             return;
         }
 
@@ -140,7 +145,7 @@ public class Layer
         weights += weightsChange; //OK
         if (withBiases)
         {
-            biases -= delta;
+            biases += -learningRate * delta;
         }
     }
 }

@@ -24,7 +24,10 @@ public class IDX
         for (int i = 0; i < nDim; i++)
         {
             var bytes = stream.ReadBytes(4);
-            Array.Reverse(bytes);
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(bytes);
+            }
             dim[i] =  BitConverter.ToInt32(bytes, 0);
         }
         int totalLen = 1;
@@ -34,6 +37,5 @@ public class IDX
             totalLen = totalLen * d;
         }
         this.data = stream.ReadBytes((int)totalLen);
-        
     }
 }
