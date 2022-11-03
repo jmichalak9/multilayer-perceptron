@@ -62,15 +62,17 @@ class Program
     public static void MNIST()
     {
         var mnist = new MNIST("../../../../../data/mnist");
-        var errorFunction = ErrorFunctions.Square;
-        var activationFunction = ActivationFunctions.Tanh;
+        var errorFunction = ErrorFunctions.CrossEntropy;
+        var activationFunction = ActivationFunctions.Sigmoid;
 
         var weightSW = new StreamWriter("../../../../../weights.txt");
         var lossSW = new StreamWriter("../../../../../loss.txt");
 
         Layer[] layers = { new Layer(mnist.trainInputs.ColumnCount), new Layer(300), new Layer(300), new Layer(mnist.trainLabels.ColumnCount) };
-        var mlp = new MLP(layers, errorFunction, activationFunction, 0.01f, 0.5f, true, new Random(seed), weightSW, lossSW);
-        mlp.Fit(500, mnist.trainInputs, mnist.trainLabels);
+        var mlp = new MLP(layers, errorFunction, activationFunction, 0.0005f, 0.5f, true, new Random(seed), weightSW, lossSW);
+        // 10 ~ 93%
+        // 20 ~ 94%
+        mlp.Fit(20, mnist.trainInputs, mnist.trainLabels);
         weightSW.Close();
         lossSW.Close();
         

@@ -31,7 +31,9 @@ public class IDX
             dim[i] =  BitConverter.ToInt32(bytes, 0);
         }
         int totalLen = 1;
-        dim[0] = 1000;
+
+        // Reduce dataset size - for developing purpose
+        //dim[0] /= 100;
         foreach(var d in dim)
         {
             totalLen = totalLen * d;

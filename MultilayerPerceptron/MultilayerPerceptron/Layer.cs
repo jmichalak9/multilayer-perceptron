@@ -81,7 +81,16 @@ public class Layer
         {
             lastZ = weights * data;
         }
-        lastActivations = lastZ.Map(_activationFunction.Value);
+
+        if (next == null)
+        {
+            var softmax = ActivationFunctions.SoftMax;
+            lastActivations = softmax.Value(lastZ);
+        }
+        else
+        {
+            lastActivations = lastZ.Map(_activationFunction.Value);
+        }
 
         return lastActivations;
     }
@@ -99,7 +108,6 @@ public class Layer
 
             var dE = Vector<double>.Build.DenseOfArray(errors);
             var da = softmax.DerivativeValue(lastZ);
-            var test = da.Row(0);
             delta = da * dE;
             //delta = dE.PointwiseMultiply(lastZ.Map(_activationFunction.DerivativeValue)); //OK
             return;
