@@ -70,7 +70,6 @@ class Program
 
         Layer[] layers = { new Layer(mnist.trainInputs.ColumnCount), new Layer(300), new Layer(300), new Layer(mnist.trainLabels.ColumnCount) };
         var mlp = new MLP(layers, errorFunction, activationFunction, 0.0005f, 0.5f, true, new Random(seed), weightSW, lossSW);
-        // 10 ~ 93%
         // 20 ~ 94%
         mlp.Fit(20, mnist.trainInputs, mnist.trainLabels);
         weightSW.Close();

@@ -87,11 +87,11 @@ public class MLP
                 Console.WriteLine($"Epoch: {e}, Loss: {current_loss}, dLoss: {loss - current_loss}");
             }
 
-            //if (e % 50 == 0)
-            //{
-            //    ExportWeights(e);
-            //    ExportLoss(e);
-            //}
+            if (e % 2 == 0)
+            {
+                ExportWeights(e);
+                ExportLoss(e);
+            }
             loss = current_loss;
         }
     }
